@@ -1,0 +1,19 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch ./server/index.js"
+  },
+  "author": "Fernando Serrano Carpena",
+  "license": "MIT",
+  "dependencies": {
+    "express": "4.18.2",
+    "morgan": "^1.10.0",
+    "sequelize": "^6.33.0",
+    "socket.io": "^4.7.2",
+    "sqlite3": "^5.1.6"
+  }
+}
