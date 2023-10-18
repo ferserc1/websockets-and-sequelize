@@ -39,7 +39,7 @@ const io = new Server(server, {
 });
 
 // Con esto ya podemos escuchar conexiones
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
 
     socket.on('disconnect', () => {
         console.log("Client disconnected");
@@ -48,20 +48,30 @@ io.on('connection', (socket) => {
     console.log("User connected");
 
     socket.on('chat message', async msg => {
-        let result;
         try {
-            result = await Message.create({
+            const count = await Message.count();
+            const result = await Message.create({
                 message: msg
             });
+            io.emit('chat message', msg, count);
         }
         catch (err) {
             console.error(err);
             return;
         }
-
-
-        io.emit('chat message', msg, result.id);
     });
+
+    if (!socket.recovered) {
+        try {
+            const results = await Message.findAndCountAll({
+                offset: socket.handshake.auth.serverOffset
+            });
+            console.log(results);
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
 });
 
 app.use(logger('dev'));
