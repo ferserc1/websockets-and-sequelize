@@ -64,9 +64,11 @@ io.on('connection', async (socket) => {
     if (!socket.recovered) {
         try {
             const results = await Message.findAndCountAll({
-                offset: socket.handshake.auth.serverOffset
+                offset: socket.handshake.auth?.serverOffset ?? 0
             });
-            console.log(results);
+            results.rows.forEach((row,i) => {
+                socket.emit('chat message', row.message, (socket.handshake.auth?.serverOffset ?? 0) + i);
+            });
         }
         catch (err) {
             console.error(err);
