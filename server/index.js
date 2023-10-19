@@ -18,7 +18,8 @@ const Message = sequelize.define('Message', {
         allowNull: false,
         primaryKey: true
     },
-    message: DataTypes.STRING
+    message: DataTypes.STRING,
+    user: DataTypes.STRING
 });
 
 // Sincronizamos el esquema con la base de datos: si las tablas
@@ -47,13 +48,15 @@ io.on('connection', async (socket) => {
 
     console.log("User connected");
 
-    socket.on('chat message', async msg => {
+    socket.on('chat message', async (msg) => {
         try {
             const count = await Message.count();
+            const user = socket.handshake.auth?.username; 
             const result = await Message.create({
-                message: msg
+                message: msg,
+                user
             });
-            io.emit('chat message', msg, count);
+            io.emit('chat message', msg, count, user);
         }
         catch (err) {
             console.error(err);
@@ -67,7 +70,7 @@ io.on('connection', async (socket) => {
                 offset: socket.handshake.auth?.serverOffset ?? 0
             });
             results.rows.forEach((row,i) => {
-                socket.emit('chat message', row.message, (socket.handshake.auth?.serverOffset ?? 0) + i);
+                socket.emit('chat message', row.message, (socket.handshake.auth?.serverOffset ?? 0) + i, row.user);
             });
         }
         catch (err) {
